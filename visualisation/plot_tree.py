@@ -7,8 +7,7 @@ import graphviz
 
 def visualize_decision_tree():
     # Charger le modèle entraîné
-    model = joblib.load('model/decision_tree.joblib')
-
+    model = joblib.load('../model/decision_tree.joblib')
     # Visualisation avec matplotlib
     plt.figure(figsize=(20, 10))
     plot_tree(model,
@@ -19,7 +18,7 @@ def visualize_decision_tree():
               rounded=True,
               fontsize=10)
     plt.title("Arbre de Décision - Diagnostic du Diabète")
-    plt.savefig('evaluation/decision_tree_visual.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../evaluation/decision_tree_visual.png', dpi=300, bbox_inches='tight')
     plt.show()
 
     # Version simplifiée pour le rapport
@@ -32,7 +31,7 @@ def visualize_decision_tree():
               rounded=True,
               max_depth=3)  # Limiter la profondeur pour la lisibilité
     plt.title("Arbre de Décision (Profondeur limitée à 3)")
-    plt.savefig('evaluation/decision_tree_simplified.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../evaluation/decision_tree_simplified.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 
