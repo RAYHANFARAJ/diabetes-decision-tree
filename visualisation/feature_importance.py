@@ -6,7 +6,7 @@ import pandas as pd
 
 def plot_feature_importance():
     # Charger le modèle
-    model = joblib.load('model/decision_tree.joblib')
+    model = joblib.load('../model/decision_tree.joblib')
 
     # Features du dataset Pima Indians
     features = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness',
@@ -27,7 +27,7 @@ def plot_feature_importance():
     plt.xlabel('Importance')
     plt.title('Importance des Variables dans la Prédiction du Diabète')
     plt.tight_layout()
-    plt.savefig('evaluation/feature_importance.png', dpi=300)
+    plt.savefig('../evaluation/feature_importance.png', dpi=300)
     plt.show()
 
     # Afficher les valeurs numériques
