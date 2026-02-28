@@ -6,7 +6,7 @@ Projet de classification du diabète avec GridSearchCV et arbre de décision
 Ce projet implémente un **système de diagnostic du diabète** utilisant un **arbre de décision** pour prédire si un patient est diabétique ou non à partir de ses données médicales.  
 Le modèle est simple, interprétable et peut être testé via une interface utilisateur (optionnelle).
 
----
+-----
 
 ## Objectif
 - Prédire le diagnostic diabétique (Diabétique / Non diabétique) à partir de variables telles que : âge, IMC, tension artérielle, taux de glucose, antécédents familiaux, etc.
