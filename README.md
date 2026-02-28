@@ -12,7 +12,8 @@ Le modèle est simple, interprétable et peut être testé via une interface uti
 - Prédire le diagnostic diabétique (Diabétique / Non diabétique) à partir de variables telles que : âge, IMC, tension artérielle, taux de glucose, antécédents familiaux, etc.
 - Fournir un modèle interprétable avec visualisation de l’arbre de décision.
 - Optionnel : permettre à un utilisateur de tester son diagnostic via une interface Streamlit.
-
+- Added dataset description
+- Added model accuracy score
 ---
 
 ## Données
