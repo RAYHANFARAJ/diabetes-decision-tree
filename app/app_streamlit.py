@@ -1,9 +1,6 @@
 import streamlit as st
 import joblib
-import pandas as pd
-from PIL import Image
 import os
-
 
 # -------------------------------------------------
 #            CONFIGURATION DE LA PAGE
@@ -32,17 +29,33 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 # -------------------------------------------------
 #                 CHEMINS DES FICHIERS
 # -------------------------------------------------
-MODEL_PATH = "./model/decision_tree.joblib"
-TREE_IMG = "./evaluation/decision_tree_visual.png"
-FEATURE_IMG = "./evaluation/feature_importance.png"
-RULES_PATH = "./evaluation/rules.txt"
+BASE_DIR = os.path.dirname(__file__)           # chemin vers app/
+ROOT_DIR = os.path.join(BASE_DIR, "..")        # chemin vers projetbigdata
 
-model = joblib.load(MODEL_PATH)
+# Modèle
+MODEL_PATH = os.path.join(ROOT_DIR, "model", "decision_tree.joblib")
 
+# Images
+ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
+DIABETE5_IMG = os.path.join(ASSETS_DIR, "diabete5.jpg")
+DIABETE2_IMG = os.path.join(ASSETS_DIR, "diabete2.jpg")
+DIABETE6_IMG = os.path.join(ASSETS_DIR, "diabete6.jpg")
+
+# Évaluation
+EVAL_DIR = os.path.join(ROOT_DIR, "evaluation")
+TREE_IMG = os.path.join(EVAL_DIR, "decision_tree_visual.png")
+FEATURE_IMG = os.path.join(EVAL_DIR, "feature_importance.png")
+RULES_PATH = os.path.join(EVAL_DIR, "rules.txt")
+
+# Charger le modèle avec vérification
+if os.path.exists(MODEL_PATH):
+    model = joblib.load(MODEL_PATH)
+else:
+    st.error(f"Modèle non trouvé à l'emplacement : {MODEL_PATH}")
+    st.stop()  # arrête le script si le modèle est introuvable
 
 # -------------------------------------------------
 #                 MENU LATÉRAL
@@ -58,9 +71,7 @@ menu = st.sidebar.radio(
     ]
 )
 
-
-
-## =================================================
+# =================================================
 #                 PAGE : ACCUEIL
 # =================================================
 if menu == "🏠 Accueil":
@@ -68,25 +79,30 @@ if menu == "🏠 Accueil":
     st.markdown("<h1 style='text-align:center; color:#0a89c2;'> Bienvenue au SugarSense</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; font-size:18px;'>Découvrez notre application interactive basée sur un <b>arbre de décision</b> pour prédire le diabète avec précision.</p>", unsafe_allow_html=True)
 
-    # ---------------- IMAGES EN LIGNE ----------------
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.image("./assets/diabete5.jpg", use_container_width=True)
+        if os.path.exists(DIABETE5_IMG):
+            st.image(DIABETE2_IMG, use_container_width=True)
+        else:
+            st.warning("Image diabete5.jpg manquante")
         st.caption("Symptômes")
 
     with col2:
-        st.image("./assets/diabete2.jpg", use_container_width=True)
+        if os.path.exists(DIABETE2_IMG):
+            st.image(DIABETE5_IMG, use_container_width=True)
+        else:
+            st.warning("Image diabete2.jpg manquante")
         st.caption("Prévention")
 
     with col3:
-        st.image("./assets/diabete6.jpg", use_container_width=True)
+        if os.path.exists(DIABETE6_IMG):
+            st.image(DIABETE6_IMG, use_container_width=True)
+        else:
+            st.warning("Image diabete6.jpg manquante")
         st.caption("Diagnostic")
 
-    # ---------------- VIDEO EXPLICATIVE ----------------
-    # ---------------- TEXTE EXPLICATIF À LA PLACE DE LA VIDÉO ----------------
     st.markdown("<h2 style='color:#146494;'>💡 Le diabète : Comprendre et se protéger</h2>", unsafe_allow_html=True)
-
     st.markdown("""
     Le **diabète** est une maladie chronique caractérisée par un taux élevé de glucose dans le sang.  
     Il apparaît lorsque le corps ne produit pas assez d’**insuline** ou ne l’utilise pas correctement.
@@ -98,25 +114,19 @@ if menu == "🏠 Accueil":
     - Envies fréquentes d'uriner  
     - Vision trouble  
 
-    ---
-
     ### 🛡️ Comment se protéger du diabète ?  
     Voici des actions simples et efficaces :
 
-    - 🥗 **Adopter une alimentation équilibrée** (moins de sucre, moins de fritures, plus de légumes)  
+    - 🥗 **Adopter une alimentation équilibrée**  
     - 🚶 **Bouger au moins 30 minutes par jour**  
     - ⚖️ **Maintenir un poids stable**  
     - 💧 **Boire suffisamment d’eau**  
     - 😴 **Bien dormir et gérer le stress**  
-    - 🩺 **Faire un contrôle de glycémie régulièrement**, surtout s’il y a des antécédents familiaux  
-
-    Un mode de vie sain permet de réduire jusqu’à **70%** le risque de développer un diabète de type 2.
-
+    - 🩺 **Faire un contrôle de glycémie régulièrement**
     """, unsafe_allow_html=True)
 
-
 # =================================================
-#             PAGE : DIAGNOSTIC
+#                 PAGE : DIAGNOSTIC
 # =================================================
 elif menu == "🧪 Diagnostic":
 
@@ -138,22 +148,52 @@ elif menu == "🧪 Diagnostic":
         Age = col2.number_input("Âge", 1, 120)
 
         st.markdown("</div>", unsafe_allow_html=True)
-
         submit = st.form_submit_button("🔍 Diagnostiquer")
 
     if submit:
-        data = [[Pregnancies, Glucose, BloodPressure, SkinThickness,
-                 Insulin, BMI, DPF, Age]]
-
+        data = [[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DPF, Age]]
         pred = model.predict(data)[0]
         prob = model.predict_proba(data)[0][pred] * 100
 
+        st.markdown("<hr>", unsafe_allow_html=True)  # ligne de séparation
+
+        # Style attrayant selon le résultat
         if pred == 1:
-            st.error(f"🩺 Résultat : **DIABÉTIQUE** (Confiance : {prob:.2f}%)")
+            st.markdown(
+                f"""
+                <div style="
+                    background-color:#ffcccc;
+                    border-radius:12px;
+                    padding:20px;
+                    text-align:center;
+                    box-shadow:0px 0px 10px #dcdcdc;
+                ">
+                    <h2 style="color:#b30000;">🩺 Attention ! Résultat : DIABÉTIQUE</h2>
+                    <p style="font-size:18px;">Confiance du modèle : <b>{prob:.2f}%</b></p>
+                    <p style="font-size:16px;">
+                        Il est fortement conseillé de consulter un professionnel de santé pour un suivi adapté.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True
+            )
         else:
-            st.success(f"🩺 Résultat : **NON DIABÉTIQUE** (Confiance : {prob:.2f}%)")
-
-
+            st.markdown(
+                f"""
+                <div style="
+                    background-color:#ccffcc;
+                    border-radius:12px;
+                    padding:20px;
+                    text-align:center;
+                    box-shadow:0px 0px 10px #dcdcdc;
+                ">
+                    <h2 style="color:#006600;">🩺 Bonne nouvelle ! Résultat : NON DIABÉTIQUE</h2>
+                    <p style="font-size:18px;">Confiance du modèle : <b>{prob:.2f}%</b></p>
+                    <p style="font-size:16px;">
+                        Continuez à maintenir un mode de vie sain pour prévenir le diabète.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True
+            )
 
 # =================================================
 #          PAGE : ARBRE DE DÉCISION
@@ -161,13 +201,10 @@ elif menu == "🧪 Diagnostic":
 elif menu == "🌳 Arbre de Décision":
 
     st.markdown("<p class='section-title'>🌳 Arbre de Décision</p>", unsafe_allow_html=True)
-
     if os.path.exists(TREE_IMG):
-        st.image(TREE_IMG, use_container_width=True)
+        st.image(TREE_IMG, use_column_width=True)
     else:
-        st.warning("Image manquante.")
-
-
+        st.warning("Image de l'arbre manquante")
 
 # =================================================
 #         PAGE : IMPORTANCE DES FEATURES
@@ -175,13 +212,10 @@ elif menu == "🌳 Arbre de Décision":
 elif menu == "📊 Importance des Variables":
 
     st.markdown("<p class='section-title'>📊 Importance des Variables</p>", unsafe_allow_html=True)
-
     if os.path.exists(FEATURE_IMG):
         st.image(FEATURE_IMG, width=650)
     else:
-        st.warning("Image introuvable.")
-
-
+        st.warning("Image des features manquante")
 
 # =================================================
 #              PAGE : RÈGLES DU MODÈLE
@@ -189,10 +223,9 @@ elif menu == "📊 Importance des Variables":
 elif menu == "📘 Règles du Modèle":
 
     st.markdown("<p class='section-title'>📘 Règles du modèle (export_text)</p>", unsafe_allow_html=True)
-
     if os.path.exists(RULES_PATH):
         with open(RULES_PATH, "r") as f:
             rules = f.read()
         st.code(rules, language="markdown")
     else:
-        st.warning("rules.txt non trouvé.")
+        st.warning("rules.txt non trouvé")
